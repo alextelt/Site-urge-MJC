@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques de Participation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #161b2e;
+            --bg-card: #1e2538;
+            --accent-1: #ff6b35;
+            --accent-2: #f7931e;
+            --accent-3: #ffd23f;
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --border: #2d3548;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(247, 147, 30, 0.06) 0%, transparent 50%);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            padding: 3rem 2rem;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-1) 0%, transparent 70%);
+            opacity: 0.1;
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.15; }
+        }
+        
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            position: relative;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            padding: 1rem 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+        
+        .nav-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent-1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+        }
+        
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            border-color: var(--accent-1);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-1);
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.2);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Fraunces', serif;
+        }
+        
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-title {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>Statistiques de Participation</h1>
+            <p class="subtitle">Analyse des présences aux activités 2024-2025</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="nav">
+            <button class="nav-btn active" onclick="showSection('section-global')">Vue Globale</button>
+            <button class="nav-btn" onclick="showSection('section-periodes')">Par Période</button>
+        </div>
+        
+        <div id="section-global" class="section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Individus</div>
+                    <div class="stat-value" id="total-individus">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Présences</div>
+                    <div class="stat-value" id="total-presences">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Moyenne par personne</div>
+                    <div class="stat-value" id="moyenne-participation">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Médiane</div>
+                    <div class="stat-value" id="mediane-participation">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Participation Max</div>
+                    <div class="stat-value" id="max-participation">-</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Répartition Filles / Garçons</h3>
+                <canvas id="chart-genre-global"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Années de Naissance</h3>
+                <canvas id="chart-annees-global"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Quotient Familial</h3>
+                <canvas id="chart-quotient-global"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h3 class="chart-title">Communes</h3>
+                <canvas id="chart-villes-global"></canvas>
+            </div>
+        </div>
+        
+        <div id="section-periodes" class="section">
+            <select id="period-selector" onchange="updatePeriodStats()">
+                <option value="">Sélectionner une période</option>
+            </select>
+            
+            <div id="period-stats"></div>
+        </div>
+    </div>
+    
+    <script>
+        const appData = {
+  "metadata": {
+    "total_individus": 58,
+    "total_presences": 804,
+    "genres": {
+      "h": 43,
+      "f": 15
+    },
+    "annees_naissance": {
+      "2006": 1,
+      "2007": 2,
+      "2008": 1,
+      "2009": 6,
+      "2010": 16,
+      "2011": 8,
+      "2012": 13,
+      "2013": 9,
+      "2014": 2
+    },
+    "quotients": {
+      ">2001": 15,
+      "661-780": 7,
+      "901-1000": 7,
+      "381-540": 7,
+      "1001-1100": 4,
+      "1501-1750": 4,
+      "781-900": 4,
+      "<380": 3,
+      "1751-2000": 3,
+      "Non renseigné": 2,
+      "541-660": 1,
+      "1101-1200": 1
+    },
+    "villes": {
+      "L'ARBRESLE": 42,
+      "SAIN-BEL": 5,
+      "BULLY": 5,
+      "SAVIGNY": 2,
+      "ÉVEUX": 1,
+      "SAINT-JULIEN-SUR-BIBOST": 1,
+      "CHÂTILLON": 1,
+      "SAINT-PIERRE-LA-PALUD": 1
+    }
+  },
+  "stats_globales": {
+    "moyenne_participation": 13.862068965517242,
+    "mediane_participation": 6.5,
+    "max_participation": 81
+  },
+  "periodes": [
+    "Soirée",
+    "Périscolaire 24-25",
+    "Périscolaire 25-26",
+    "Été 14-17 ans",
+    "Printemps 15-17 ans",
+    "Automne 15-17 ans"
+  ],
+  "stats_par_periode": {
+    "Soirée": {
+      "total_participants": 42,
+      "total_presences": 88,
+      "genre": {
+        "h": 29,
+        "f": 13
+      },
+      "annees_naissance": {
+        "2006": 1,
+        "2007": 1,
+        "2008": 1,
+        "2009": 3,
+        "2010": 10,
+        "2011": 8,
+        "2012": 9,
+        "2013": 7,
+        "2014": 2
+      },
+      "quotients": {
+        ">2001": 11,
+        "901-1000": 7,
+        "381-540": 5,
+        "1001-1100": 4,
+        "661-780": 3,
+        "1501-1750": 3,
+        "Non renseigné": 2,
+        "781-900": 2,
+        "1751-2000": 2,
+        "<380": 2,
+        "541-660": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 32,
+        "BULLY": 4,
+        "SAIN-BEL": 2,
+        "SAVIGNY": 2,
+        "ÉVEUX": 1,
+        "SAINT-JULIEN-SUR-BIBOST": 1
+      }
+    },
+    "Périscolaire 24-25": {
+      "total_participants": 25,
+      "total_presences": 517,
+      "genre": {
+        "h": 23,
+        "f": 2
+      },
+      "annees_naissance": {
+        "2007": 2,
+        "2008": 1,
+        "2009": 4,
+        "2010": 5,
+        "2011": 1,
+        "2012": 8,
+        "2013": 4
+      },
+      "quotients": {
+        "381-540": 5,
+        ">2001": 4,
+        "661-780": 3,
+        "<380": 3,
+        "781-900": 3,
+        "1751-2000": 2,
+        "Non renseigné": 1,
+        "541-660": 1,
+        "1001-1100": 1,
+        "901-1000": 1,
+        "1501-1750": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 19,
+        "SAIN-BEL": 4,
+        "ÉVEUX": 1,
+        "CHÂTILLON": 1
+      }
+    },
+    "Périscolaire 25-26": {
+      "total_participants": 6,
+      "total_presences": 76,
+      "genre": {
+        "h": 5,
+        "f": 1
+      },
+      "annees_naissance": {
+        "2012": 5,
+        "2014": 1
+      },
+      "quotients": {
+        ">2001": 2,
+        "901-1000": 2,
+        "381-540": 1,
+        "1751-2000": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 5,
+        "ÉVEUX": 1
+      }
+    },
+    "Été 14-17 ans": {
+      "total_participants": 9,
+      "total_presences": 90,
+      "genre": {
+        "h": 7,
+        "f": 2
+      },
+      "annees_naissance": {
+        "2009": 3,
+        "2010": 5,
+        "2011": 1
+      },
+      "quotients": {
+        "661-780": 3,
+        ">2001": 3,
+        "781-900": 1,
+        "381-540": 1,
+        "1101-1200": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 6,
+        "BULLY": 1,
+        "SAIN-BEL": 1,
+        "SAINT-PIERRE-LA-PALUD": 1
+      }
+    },
+    "Printemps 15-17 ans": {
+      "total_participants": 3,
+      "total_presences": 17,
+      "genre": {
+        "h": 3
+      },
+      "annees_naissance": {
+        "2008": 1,
+        "2009": 1,
+        "2010": 1
+      },
+      "quotients": {
+        "661-780": 1,
+        ">2001": 1,
+        "381-540": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 2,
+        "BULLY": 1
+      }
+    },
+    "Automne 15-17 ans": {
+      "total_participants": 3,
+      "total_presences": 16,
+      "genre": {
+        "h": 2,
+        "f": 1
+      },
+      "annees_naissance": {
+        "2010": 2,
+        "2011": 1
+      },
+      "quotients": {
+        "1001-1100": 1,
+        "781-900": 1,
+        ">2001": 1
+      },
+      "villes": {
+        "L'ARBRESLE": 2,
+        "BULLY": 1
+      }
+    }
+  }
+};
+        
+        // Initialiser l'app directement
+        initApp();
+        
+        function initApp() {
+            // Stats globales
+            document.getElementById('total-individus').textContent = appData.metadata.total_individus;
+            document.getElementById('total-presences').textContent = appData.metadata.total_presences;
+            document.getElementById('moyenne-participation').textContent = appData.stats_globales.moyenne_participation.toFixed(1);
+            document.getElementById('mediane-participation').textContent = appData.stats_globales.mediane_participation.toFixed(1);
+            document.getElementById('max-participation').textContent = appData.stats_globales.max_participation;
+            
+            // Charts globaux
+            createPieChart('chart-genre-global', appData.metadata.genres, ['#ff6b35', '#f7931e']);
+            createBarChart('chart-annees-global', appData.metadata.annees_naissance);
+            createBarChart('chart-quotient-global', appData.metadata.quotients);
+            createBarChart('chart-villes-global', appData.metadata.villes);
+            
+            // Remplir le sélecteur de périodes
+            const selector = document.getElementById('period-selector');
+            appData.periodes.forEach(period => {
+                const option = document.createElement('option');
+                option.value = period;
+                option.textContent = period;
+                selector.appendChild(option);
+            });
+        }
+        
+        function createPieChart(canvasId, data, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        data: Object.values(data),
+                        backgroundColor: colors || ['#ff6b35', '#f7931e', '#ffd23f'],
+                        borderWidth: 2,
+                        borderColor: '#1e2538'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e8eaed',
+                                padding: 20,
+                                font: { size: 14, family: 'DM Sans' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createBarChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // Ordre personnalisé pour les quotients
+            const quotientOrder = ['<380', '381-540', '541-660', '661-780', '781-900', '901-1000', '1001-1100', '1101-1200', '1201-1300', '1301-1400', '1401-1500', '1501-1750', '1751-2000', '>2001'];
+            
+            let sortedData;
+            const keys = Object.keys(data);
+            
+            // Vérifier si ce sont des quotients en testant si au moins une clé est dans quotientOrder
+            const isQuotient = keys.some(k => quotientOrder.includes(k));
+            
+            if (isQuotient) {
+                // Trier selon l'ordre des quotients
+                sortedData = quotientOrder
+                    .filter(q => data[q] !== undefined)
+                    .map(q => [q, data[q]]);
+            } else if (keys.every(k => !isNaN(k))) {
+                // Trier numériquement pour les années
+                sortedData = Object.entries(data).sort((a, b) => a[0] - b[0]);
+            } else {
+                // Pour les villes, trier par valeur décroissante
+                sortedData = Object.entries(data).sort((a, b) => b[1] - a[1]);
+            }
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedData.map(d => d[0]),
+                    datasets: [{
+                        label: 'Nombre',
+                        data: sortedData.map(d => d[1]),
+                        backgroundColor: 'rgba(255, 107, 53, 0.8)',
+                        borderColor: '#ff6b35',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#9ca3af', font: { family: 'DM Sans' } },
+                            grid: { color: '#2d3548' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af', font: { family: 'DM Sans' } },
+                            grid: { color: '#2d3548' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updatePeriodStats() {
+            const period = document.getElementById('period-selector').value;
+            if (!period) return;
+            
+            const stats = appData.stats_par_periode[period];
+            const container = document.getElementById('period-stats');
+            
+            if (stats.total_participants === 0) {
+                container.innerHTML = '<div class="no-data">Aucun participant pour cette période</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Participants</div>
+                        <div class="stat-value">${stats.total_participants}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Présences</div>
+                        <div class="stat-value">${stats.total_presences}</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">Répartition Filles / Garçons</h3>
+                    <canvas id="chart-genre-period"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">Années de Naissance</h3>
+                    <canvas id="chart-annees-period"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">Quotient Familial</h3>
+                    <canvas id="chart-quotient-period"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">Communes</h3>
+                    <canvas id="chart-villes-period"></canvas>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                createPieChart('chart-genre-period', stats.genre, ['#ff6b35', '#f7931e']);
+                createBarChart('chart-annees-period', stats.annees_naissance);
+                createBarChart('chart-quotient-period', stats.quotients);
+                createBarChart('chart-villes-period', stats.villes);
+            }, 100);
+        }
+        
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
