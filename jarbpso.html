@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistiques PSO 11-14 ans — MJC L'Arbresle</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --c1:#059669;--c1-light:#ECFDF5;
+    --c2:#0891B2;--c2-light:#E0F2FE;
+    --neutral:#0F172A;--muted:#64748B;--surface:#F8FAFC;--border:#E2E8F0;--white:#FFFFFF;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);--radius:14px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--neutral);min-height:100vh;}
+
+  /* HEADER */
+  .header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;height:64px;box-shadow:var(--shadow-sm);}
+  .header-brand{display:flex;align-items:center;gap:12px;}
+  .header-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--c1),var(--c2));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;}
+  .header-title{font-family:'DM Serif Display',serif;font-size:1.1rem;}
+  .header-sub{font-size:.75rem;color:var(--muted);margin-top:1px;}
+  .header-badge{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.72rem;color:var(--muted);font-weight:500;}
+
+  /* NAV */
+  .main-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;gap:0;overflow-x:auto;}
+  .main-nav-btn{padding:14px 18px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;margin-bottom:-1px;}
+  .main-nav-btn:hover{color:var(--neutral);}
+  .main-nav-btn.active{color:var(--c1);border-bottom-color:var(--c1);}
+
+  /* BADGE */
+  .badge{font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:600;margin-left:6px;}
+  .badge-main{background:var(--c1-light);color:var(--c1);}
+  .badge-period{background:var(--c2-light);color:var(--c2);}
+
+  /* PANELS */
+  .panel{display:none;padding:2rem;max-width:1400px;margin:0 auto;}
+  .panel.active{display:block;animation:fadeIn .25s ease;}
+  .section-title{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.2rem;}
+  .section-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem;}
+
+  /* KPI */
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--white);border-radius:var(--radius);padding:1.1rem 1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:box-shadow .2s;}
+  .kpi-card:hover{box-shadow:var(--shadow-md);}
+  .kpi-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;}
+  .kpi-value{font-size:1.75rem;font-weight:700;line-height:1;}
+  .kpi-sub{font-size:.72rem;color:var(--muted);margin-top:6px;}
+
+  /* CHARTS */
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+  .chart-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:1.25rem 1.5rem;}
+  .chart-title{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:1rem;}
+  .chart-wrap{position:relative;height:240px;}
+  .chart-wrap-tall{position:relative;height:340px;}
+
+  /* PERIOD SELECTOR */
+  .period-select-wrap{margin-bottom:1.5rem;}
+  .period-select-wrap select{appearance:none;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 40px 10px 14px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--neutral);cursor:pointer;box-shadow:var(--shadow-sm);min-width:280px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+  .period-select-wrap select:focus{outline:none;border-color:var(--c1);}
+
+  /* TABLE */
+  .table-wrap{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:2rem;}
+  .act-table{width:100%;border-collapse:collapse;}
+  .act-table th{text-align:left;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .act-table td{padding:11px 16px;border-bottom:1px solid var(--border);font-size:.875rem;}
+  .act-table tr:last-child td{border-bottom:none;}
+  .act-table tr:hover td{background:var(--surface);}
+  .act-name{font-weight:600;display:flex;align-items:center;gap:8px;}
+  .act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+  /* MISC */
+  .no-data{text-align:center;padding:3rem;color:var(--muted);font-style:italic;}
+  .period-stats-header{background:linear-gradient(135deg,var(--c1),var(--c2));border-radius:var(--radius);padding:1.25rem 1.5rem;color:white;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .period-stats-header h2{font-family:'DM Serif Display',serif;font-size:1.3rem;}
+  .period-stats-header .pills{display:flex;gap:10px;flex-wrap:wrap;}
+  .period-pill{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:.8rem;font-weight:600;}
+
+  @media(max-width:900px){.kpi-grid,.kpi-grid-3{grid-template-columns:repeat(2,1fr);}.charts-grid{grid-template-columns:1fr;}.panel{padding:1rem;}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">MJC</div>
+    <div><div class="header-title">Statistiques PSO 11-14 ans</div><div class="header-sub">MJC L'Arbresle — 2024-2026</div></div>
+  </div>
+  <span class="header-badge">105 participants · 1 092 passages · 14 communes</span>
+</header>
+
+<nav class="main-nav">
+  <button class="main-nav-btn active" onclick="showPanel('global',this)">Vue Globale <span class="badge badge-main">105</span></button>
+  <button class="main-nav-btn" onclick="showPanel('periodes',this)">Par Période <span class="badge badge-period">12</span></button>
+  <button class="main-nav-btn" onclick="showPanel('tableau',this)">Tableau récapitulatif</button>
+</nav>
+
+<!-- ===== GLOBAL ===== -->
+<div id="panel-global" class="panel active">
+  <div class="section-title">Vue d'ensemble</div>
+  <div class="section-sub">PSO 11-14 ans — 2024-2026 · 105 participants uniques</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Total individus</div><div class="kpi-value" style="color:var(--c1)">105</div><div class="kpi-sub">participants uniques</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total passages</div><div class="kpi-value" style="color:var(--c1)">1 092</div></div>
+    <div class="kpi-card"><div class="kpi-label">Moyenne / personne</div><div class="kpi-value" style="color:var(--c1)">10.4</div><div class="kpi-sub">passages</div></div>
+    <div class="kpi-card"><div class="kpi-label">Médiane</div><div class="kpi-value" style="color:var(--c1)">6.0</div></div>
+    <div class="kpi-card"><div class="kpi-label">Participation max</div><div class="kpi-value" style="color:var(--c1)">63</div><div class="kpi-sub">passages pour 1 individu</div></div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Répartition Filles / Garçons</div>
+      <div class="chart-wrap"><canvas id="cg-global"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Années de naissance</div>
+      <div class="chart-wrap"><canvas id="cn-global"></canvas></div>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Quotient Familial</div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="cq-global"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Communes</div>
+      <div class="chart-wrap chart-wrap-tall"><canvas id="cv-global"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAR PÉRIODE ===== -->
+<div id="panel-periodes" class="panel">
+  <div class="section-title">Détail par période</div>
+  <div class="section-sub">Sélectionner une période pour afficher les statistiques détaillées</div>
+
+  <div class="period-select-wrap">
+    <select id="period-selector" onchange="updatePeriodStats()">
+      <option value="">Sélectionner une période…</option>
+      <option>Hiver Arbresle</option>
+      <option>Hiver BSGN</option>
+      <option>Séjour Hiver</option>
+      <option>Printemps Arbresle</option>
+      <option>Printemps BSGN</option>
+      <option>Été Arbresle</option>
+      <option>Été BSGN</option>
+      <option>Automne Arbresle</option>
+      <option>Automne BSGN</option>
+      <option>Séjour Été</option>
+      <option>Mercredis 24-25</option>
+      <option>Mercredis 25-26</option>
+    </select>
+  </div>
+  <div id="period-stats"></div>
+</div>
+
+<!-- ===== TABLEAU ===== -->
+<div id="panel-tableau" class="panel">
+  <div class="section-title">Tableau récapitulatif</div>
+  <div class="section-sub">Synthèse de toutes les périodes</div>
+  <div class="table-wrap">
+    <table class="act-table">
+      <thead><tr><th>Période</th><th>Participants</th><th>Passages</th><th>Moy. passages</th><th>Filles</th><th>Garçons</th></tr></thead>
+      <tbody id="recap-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const COLORS=['#059669','#0891B2','#7C3AED','#DB2777','#F59E0B','#EF4444','#2563EB','#D97706','#10B981','#EC4899','#8B5CF6','#0EA5E9'];
+
+const appData={"metadata":{"total_individus":105,"total_presences":1092,"genres":{"M":64,"F":41},"villes":{"L'ARBRESLE":57,"BULLY":24,"SAIN-BEL":6,"LENTILLY":3,"SAVIGNY":3,"TARARE":2,"SAINT-GERMAIN-NUELLES":2,"SAINT-JULIEN-SUR-BIBOST":2,"BESSENAY":1,"BELLEVILLE-EN-BEAUJOLAIS":1,"VILLEURBANNE":1,"SAINT-ROMAIN-DE-POPEY":1,"ÉVEUX":1,"CHÂTILLON":1},"quotients":{">2001":30,"1501-1750":11,"381-540":10,"901-1000":10,"781-900":9,"1001-1100":8,"1751-2000":7,"1301-1400":5,"661-780":5,"1401-1500":4,"1201-1300":2,"<380":2,"1101-1200":1,"541-660":1},"annees_naissance":{"2013":30,"2012":28,"2011":20,"2010":13,"2014":10,"2015":1,"2009":1,"2007":1,"2008":1}},"periodes":["Hiver Arbresle","Hiver BSGN","Séjour Hiver","Printemps Arbresle","Printemps BSGN","Été Arbresle","Été BSGN","Automne Arbresle","Automne BSGN","Séjour Été","Mercredis 24-25","Mercredis 25-26"],"stats_par_periode":{"Hiver Arbresle":{"total_participants":22,"total_presences":126,"genre":{"M":18,"F":4},"annees_naissance":{"2012":8,"2011":5,"2010":3,"2013":3,"2009":1,"2007":1,"2008":1},"quotients":{"381-540":5,"1501-1750":3,">2001":3,"781-900":3,"901-1000":2,"1101-1200":1,"1301-1400":1,"661-780":1,"1751-2000":1,"1201-1300":1,"<380":1},"villes":{"L'ARBRESLE":17,"SAIN-BEL":2,"BESSENAY":1,"BELLEVILLE-EN-BEAUJOLAIS":1,"ÉVEUX":1}},"Hiver BSGN":{"total_participants":10,"total_presences":34,"genre":{"M":6,"F":4},"annees_naissance":{"2012":4,"2011":3,"2010":2,"2013":1},"quotients":{">2001":6,"1501-1750":2,"1001-1100":1,"1301-1400":1},"villes":{"BULLY":8,"SAINT-GERMAIN-NUELLES":2}},"Séjour Hiver":{"total_participants":13,"total_presences":65,"genre":{"F":7,"M":6},"annees_naissance":{"2012":7,"2013":5,"2011":1},"quotients":{"901-1000":4,">2001":2,"1751-2000":2,"1001-1100":2,"781-900":1,"1401-1500":1,"381-540":1},"villes":{"L'ARBRESLE":8,"SAVIGNY":3,"BULLY":1,"SAINT-JULIEN-SUR-BIBOST":1}},"Printemps Arbresle":{"total_participants":33,"total_presences":91,"genre":{"M":21,"F":12},"annees_naissance":{"2012":14,"2013":9,"2011":6,"2010":3,"2014":1},"quotients":{"901-1000":7,"1501-1750":6,">2001":4,"1001-1100":4,"381-540":4,"781-900":3,"1751-2000":2,"1101-1200":1,"1301-1400":1,"1401-1500":1},"villes":{"L'ARBRESLE":23,"LENTILLY":2,"TARARE":2,"SAVIGNY":2,"BESSENAY":1,"SAIN-BEL":1,"BELLEVILLE-EN-BEAUJOLAIS":1,"ÉVEUX":1}},"Printemps BSGN":{"total_participants":8,"total_presences":18,"genre":{"M":4,"F":4},"annees_naissance":{"2012":3,"2011":2,"2013":2,"2010":1},"quotients":{">2001":5,"1401-1500":1,"1301-1400":1,"1751-2000":1},"villes":{"BULLY":7,"SAINT-GERMAIN-NUELLES":1}},"Été Arbresle":{"total_participants":30,"total_presences":205,"genre":{"M":24,"F":6},"annees_naissance":{"2012":11,"2013":7,"2011":6,"2014":5,"2010":1},"quotients":{"381-540":7,"901-1000":4,"1501-1750":4,"661-780":3,"781-900":3,"1001-1100":2,">2001":2,"1751-2000":2,"1101-1200":1,"1301-1400":1,"<380":1},"villes":{"L'ARBRESLE":22,"SAIN-BEL":4,"BESSENAY":1,"BELLEVILLE-EN-BEAUJOLAIS":1,"ÉVEUX":1,"SAINT-JULIEN-SUR-BIBOST":1}},"Été BSGN":{"total_participants":17,"total_presences":68,"genre":{"F":11,"M":6},"annees_naissance":{"2013":5,"2012":4,"2011":3,"2014":2,"2010":2,"2015":1},"quotients":{">2001":8,"1501-1750":3,"1751-2000":2,"1001-1100":2,"1401-1500":1,"1301-1400":1},"villes":{"BULLY":14,"SAINT-GERMAIN-NUELLES":2,"VILLEURBANNE":1}},"Automne Arbresle":{"total_participants":22,"total_presences":101,"genre":{"M":12,"F":10},"annees_naissance":{"2012":8,"2013":6,"2011":4,"2014":4},"quotients":{"901-1000":5,"1501-1750":3,"1751-2000":3,"781-900":3,"381-540":2,"1301-1400":2,">2001":2,"1101-1200":1,"1401-1500":1},"villes":{"L'ARBRESLE":17,"BESSENAY":1,"SAIN-BEL":1,"SAVIGNY":1,"ÉVEUX":1,"SAINT-JULIEN-SUR-BIBOST":1}},"Automne BSGN":{"total_participants":12,"total_presences":33,"genre":{"F":8,"M":4},"annees_naissance":{"2013":8,"2014":2,"2012":2},"quotients":{">2001":7,"1751-2000":2,"1401-1500":1,"1501-1750":1,"1301-1400":1},"villes":{"BULLY":11,"SAINT-GERMAIN-NUELLES":1}},"Séjour Été":{"total_participants":16,"total_presences":80,"genre":{"M":12,"F":4},"annees_naissance":{"2012":6,"2011":4,"2010":3,"2009":1,"2013":1,"2008":1},"quotients":{">2001":5,"901-1000":3,"1001-1100":2,"1751-2000":2,"781-900":2,"661-780":1,"381-540":1},"villes":{"L'ARBRESLE":9,"SAIN-BEL":2,"SAVIGNY":2,"LENTILLY":1,"ÉVEUX":1,"CHÂTILLON":1}},"Mercredis 24-25":{"total_participants":22,"total_presences":182,"genre":{"M":20,"F":2},"annees_naissance":{"2012":9,"2013":6,"2011":4,"2010":1,"2014":1,"2008":1},"quotients":{"1001-1100":3,"381-540":3,"1751-2000":2,"781-900":2,"1401-1500":2,">2001":2,"<380":2,"901-1000":2,"661-780":1,"541-660":1,"1201-1300":1,"1501-1750":1},"villes":{"L'ARBRESLE":19,"SAINT-ROMAIN-DE-POPEY":1,"ÉVEUX":1,"SAIN-BEL":1}},"Mercredis 25-26":{"total_participants":9,"total_presences":89,"genre":{"M":6,"F":3},"annees_naissance":{"2012":4,"2011":2,"2013":2,"2014":1},"quotients":{"901-1000":3,">2001":2,"1001-1100":1,"1201-1300":1,"1751-2000":1,"1501-1750":1},"villes":{"L'ARBRESLE":6,"SAINT-ROMAIN-DE-POPEY":1,"BULLY":1,"ÉVEUX":1}}},"stats_globales":{"moyenne_participation":10.4,"mediane_participation":6.0,"min_participation":1,"max_participation":63}};
+
+const QF_ORDER=['<380','381-540','541-660','661-780','781-900','901-1000','1001-1100','1101-1200','1201-1300','1301-1400','1401-1500','1501-1750','1751-2000','>2001'];
+
+Chart.defaults.font.family='DM Sans';Chart.defaults.font.size=11;Chart.defaults.plugins.legend.display=false;
+
+function mkDoughnut(id,labels,data,colors){
+  if(!document.getElementById(id))return;
+  new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}}}});
+}
+
+function mkBar(id,labels,data,color,horiz=false){
+  if(!document.getElementById(id))return;
+  new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[{data,backgroundColor:color+'CC',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:horiz?'y':'x',plugins:{legend:{display:false}},scales:{x:{grid:{display:horiz},ticks:{font:{size:10}}},y:{grid:{color:'#F1F5F9'},ticks:{font:{size:10}}}}}});
+}
+
+function sortedEntries(obj){
+  const keys=Object.keys(obj);
+  const isQF=keys.some(k=>QF_ORDER.includes(k));
+  if(isQF)return QF_ORDER.filter(q=>obj[q]!==undefined).map(q=>[q,obj[q]]);
+  if(keys.every(k=>!isNaN(k)))return Object.entries(obj).sort((a,b)=>a[0]-b[0]);
+  return Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+}
+
+// Global charts
+mkDoughnut('cg-global',['Garçons','Filles'],[64,41],['#2563EB','#F43F5E']);
+(()=>{const e=sortedEntries(appData.metadata.annees_naissance);mkBar('cn-global',e.map(x=>x[0]),e.map(x=>x[1]),'#059669');})();
+(()=>{const e=sortedEntries(appData.metadata.quotients);mkBar('cq-global',e.map(x=>x[0]),e.map(x=>x[1]),'#0891B2',true);})();
+(()=>{const e=sortedEntries(appData.metadata.villes);mkBar('cv-global',e.map(x=>x[0]),e.map(x=>x[1]),'#7C3AED',true);})();
+
+// Tableau récapitulatif
+const tbody=document.getElementById('recap-tbody');
+appData.periodes.forEach((p,i)=>{
+  const d=appData.stats_par_periode[p];
+  const moy=d.total_participants>0?(d.total_presences/d.total_participants).toFixed(1):'—';
+  const f=d.genre.F||0,h=d.genre.M||0;
+  tbody.innerHTML+=`<tr>
+    <td><span class="act-name"><span class="act-dot" style="background:${COLORS[i%COLORS.length]}"></span>${p}</span></td>
+    <td><strong>${d.total_participants}</strong></td>
+    <td><strong>${d.total_presences}</strong></td>
+    <td>${moy}</td>
+    <td><span style="color:#F43F5E;font-weight:600">${f}</span></td>
+    <td><span style="color:#2563EB;font-weight:600">${h}</span></td>
+  </tr>`;
+});
+
+function updatePeriodStats(){
+  const period=document.getElementById('period-selector').value;
+  const container=document.getElementById('period-stats');
+  if(!period){container.innerHTML='';return;}
+  const d=appData.stats_par_periode[period];
+  const moy=(d.total_presences/d.total_participants).toFixed(1);
+  const f=d.genre.F||0,h=d.genre.M||0;
+
+  container.innerHTML=`
+    <div class="period-stats-header">
+      <h2>${period}</h2>
+      <div class="pills">
+        <span class="period-pill">${d.total_participants} participants</span>
+        <span class="period-pill">${d.total_presences} passages</span>
+        <span class="period-pill">moy. ${moy}</span>
+      </div>
+    </div>
+    <div class="kpi-grid-3">
+      <div class="kpi-card"><div class="kpi-label">Participants</div><div class="kpi-value" style="color:var(--c1)">${d.total_participants}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value" style="color:var(--c1)">${d.total_presences}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Moy. passages</div><div class="kpi-value" style="color:var(--c1)">${moy}</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Répartition Filles / Garçons</div><div class="chart-wrap"><canvas id="pd-genre"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Années de naissance</div><div class="chart-wrap"><canvas id="pd-annees"></canvas></div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Quotient Familial</div><div class="chart-wrap chart-wrap-tall"><canvas id="pd-qf"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Communes</div><div class="chart-wrap"><canvas id="pd-villes"></canvas></div></div>
+    </div>
+  `;
+
+  setTimeout(()=>{
+    mkDoughnut('pd-genre',['Garçons','Filles'],[h,f],['#2563EB','#F43F5E']);
+    const ae=sortedEntries(d.annees_naissance);mkBar('pd-annees',ae.map(x=>x[0]),ae.map(x=>x[1]),'#059669');
+    const qe=sortedEntries(d.quotients);mkBar('pd-qf',qe.map(x=>x[0]),qe.map(x=>x[1]),'#0891B2',true);
+    const ve=sortedEntries(d.villes);mkBar('pd-villes',ve.map(x=>x[0]),ve.map(x=>x[1]),'#7C3AED',true);
+  },50);
+}
+
+function showPanel(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.main-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+</script>
+</body>
+</html>
