@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistiques PSO — MJC L'Arbresle</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --u6:#2563EB;--u6-light:#EFF6FF;--o6:#059669;--o6-light:#ECFDF5;
+    --neutral:#0F172A;--muted:#64748B;--surface:#F8FAFC;--border:#E2E8F0;--white:#FFFFFF;--accent:#7C3AED;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 16px rgba(0,0,0,.10);--radius:14px;--radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--neutral);min-height:100vh;}
+  .header{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;height:64px;box-shadow:var(--shadow-sm);}
+  .header-brand{display:flex;align-items:center;gap:12px;}
+  .header-logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--u6),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:14px;}
+  .header-title{font-family:'DM Serif Display',serif;font-size:1.1rem;}
+  .header-sub{font-size:.75rem;color:var(--muted);margin-top:1px;}
+  .header-badge{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.72rem;color:var(--muted);font-weight:500;}
+  .main-nav{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;gap:0;overflow-x:auto;}
+  .main-nav-btn{padding:14px 18px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:7px;margin-bottom:-1px;white-space:nowrap;}
+  .main-nav-btn:hover{color:var(--neutral);}
+  .main-nav-btn.active{color:var(--u6);border-bottom-color:var(--u6);}
+  .badge{font-size:.65rem;padding:2px 7px;border-radius:10px;font-weight:600;}
+  .badge-u6{background:var(--u6-light);color:var(--u6);}
+  .badge-o6{background:var(--o6-light);color:var(--o6);}
+  .badge-all{background:#F3F0FF;color:var(--accent);}
+  .panel{display:none;padding:2rem;max-width:1400px;margin:0 auto;}
+  .panel.active{display:block;animation:fadeIn .25s ease;}
+  .section-title{font-family:'DM Serif Display',serif;font-size:1.5rem;margin-bottom:.2rem;}
+  .section-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem;}
+  .split-header{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+  .age-group-card{border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+  .age-u6{background:linear-gradient(135deg,var(--u6),#3B82F6);color:white;}
+  .age-o6{background:linear-gradient(135deg,var(--o6),#10B981);color:white;}
+  .age-group-label{font-size:.8rem;opacity:.85;margin-bottom:4px;font-weight:500;}
+  .age-group-count{font-size:2rem;font-weight:700;line-height:1;}
+  .age-group-sub{font-size:.75rem;opacity:.75;margin-top:4px;}
+  .age-group-icon{font-size:2.5rem;opacity:.3;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:2rem;}
+  .ville-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .kpi-card{background:var(--white);border-radius:var(--radius);padding:1.1rem 1.25rem;border:1px solid var(--border);box-shadow:var(--shadow-sm);transition:box-shadow .2s;}
+  .kpi-card:hover{box-shadow:var(--shadow-md);}
+  .kpi-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;}
+  .kpi-value{font-size:1.75rem;font-weight:700;line-height:1;}
+  .kpi-sub{font-size:.72rem;color:var(--muted);margin-top:6px;}
+  .kpi-split{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  .kpi-split-item{display:flex;align-items:center;gap:4px;font-size:.72rem;}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .dot-u6{background:var(--u6);}.dot-o6{background:var(--o6);}.dot-f{background:#F43F5E;}.dot-h{background:var(--u6);}
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;}
+  .chart-card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:1.25rem 1.5rem;}
+  .chart-title{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:1rem;}
+  .chart-wrap{position:relative;height:220px;}
+  .chart-wrap-sm{position:relative;height:180px;}
+  .chart-wrap-xs{position:relative;height:120px;}
+  .act-table-wrap{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:2rem;}
+  .act-table-head{padding:1rem 1.5rem;border-bottom:1px solid var(--border);}
+  .act-table{width:100%;border-collapse:collapse;}
+  .act-table th{text-align:left;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);}
+  .act-table td{padding:11px 16px;border-bottom:1px solid var(--border);font-size:.875rem;}
+  .act-table tr:last-child td{border-bottom:none;}
+  .act-table tr:hover td{background:var(--surface);}
+  .act-name{font-weight:600;display:flex;align-items:center;gap:8px;}
+  .act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .tab-btn{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:.8rem;font-weight:500;color:var(--muted);transition:all .2s;font-family:'DM Sans',sans-serif;}
+  .tab-btn:hover{border-color:var(--u6);color:var(--u6);}
+  .tab-btn.active{background:var(--u6);color:white;border-color:var(--u6);}
+  .tab-btn.ville-style:hover{border-color:var(--accent);color:var(--accent);}
+  .tab-btn.ville-style.active{background:var(--accent);border-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;animation:fadeIn .2s ease;}
+  .detail-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+  .dgh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:1rem;font-weight:600;font-size:.9rem;}
+  .dgh-u6{background:var(--u6-light);color:var(--u6);}
+  .dgh-o6{background:var(--o6-light);color:var(--o6);}
+  .mini-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+  .mini-kpi{background:var(--surface);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border);}
+  .mini-kpi-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;}
+  .mini-kpi-val{font-size:1.25rem;font-weight:700;margin-top:2px;}
+  .divider{height:1px;background:var(--border);margin:1.25rem 0;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.75rem;color:var(--muted);}
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  @media(max-width:900px){.kpi-grid,.ville-kpis{grid-template-columns:repeat(2,1fr);}.charts-grid,.split-header,.detail-cols{grid-template-columns:1fr;}.panel{padding:1rem;}}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">MJC</div>
+    <div><div class="header-title">Statistiques PSO</div><div class="header-sub">MJC L'Arbresle — 2024-2026</div></div>
+  </div>
+  <span class="header-badge">194 participants · 3 053 passages · 8 communes</span>
+</header>
+
+<nav class="main-nav">
+  <button class="main-nav-btn active" onclick="showPanel('global')">Vue Globale <span class="badge badge-all">194</span></button>
+  <button class="main-nav-btn" onclick="showPanel('under6')">− 6 ans <span class="badge badge-u6">85</span></button>
+  <button class="main-nav-btn" onclick="showPanel('over6')">+ 6 ans <span class="badge badge-o6">130</span></button>
+  <button class="main-nav-btn" onclick="showPanel('detail')">Détail par accueil</button>
+  <button class="main-nav-btn" onclick="showPanel('villes')">Par commune <span class="badge badge-all">8</span></button>
+</nav>
+
+<!-- ===== GLOBAL ===== -->
+<div id="panel-global" class="panel active">
+  <div class="section-title">Vue d'ensemble</div>
+  <div class="section-sub">Tous les participants — 2024/2026</div>
+  <div class="split-header">
+    <div class="age-group-card age-u6"><div><div class="age-group-label">Groupe − 6 ans</div><div class="age-group-count">85</div><div class="age-group-sub">Maternelle · 3/5 ans · 5/6 ans · 1 189 passages</div></div><div class="age-group-icon">🧒</div></div>
+    <div class="age-group-card age-o6"><div><div class="age-group-label">Groupe + 6 ans</div><div class="age-group-count">130</div><div class="age-group-sub">6/8 ans · 7/8 ans · 9/11 ans · 1 864 passages</div></div><div class="age-group-icon">👦</div></div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Total individus</div><div class="kpi-value">194</div><div class="kpi-split"><span class="kpi-split-item"><span class="dot dot-u6"></span>85 − 6 ans</span><span class="kpi-split-item"><span class="dot dot-o6"></span>130 + 6 ans</span></div></div>
+    <div class="kpi-card"><div class="kpi-label">Passages totaux</div><div class="kpi-value">3 053</div><div class="kpi-split"><span class="kpi-split-item"><span class="dot dot-u6"></span>1 189</span><span class="kpi-split-item"><span class="dot dot-o6"></span>1 864</span></div></div>
+    <div class="kpi-card"><div class="kpi-label">Moy. passages / enfant</div><div class="kpi-value">15.7</div><div class="kpi-split"><span class="kpi-split-item"><span class="dot dot-u6"></span>14.0</span><span class="kpi-split-item"><span class="dot dot-o6"></span>14.3</span></div></div>
+    <div class="kpi-card"><div class="kpi-label">Passages Mercredi</div><div class="kpi-value">1 406</div><div class="kpi-sub">24/25 : 864 · 25/26 : 542</div></div>
+    <div class="kpi-card"><div class="kpi-label">Communes</div><div class="kpi-value">8</div><div class="kpi-sub">L'Arbresle : 174 · Autres : 20</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Répartition Filles / Garçons</div><div class="chart-wrap"><canvas id="cg-global"></canvas></div><div class="legend" style="margin-top:10px"><span class="legend-item"><span class="dot dot-f"></span>Filles : 93 (47.9%)</span><span class="legend-item"><span class="dot dot-h"></span>Garçons : 101 (52.1%)</span></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par accueil — − 6 ans vs + 6 ans</div><div class="chart-wrap"><canvas id="ca-global"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Années de naissance — Comparatif</div><div class="chart-wrap"><canvas id="cn-global"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Quotient Familial (individus)</div><div class="chart-wrap"><canvas id="cq-global"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Individus par commune</div><div class="chart-wrap"><canvas id="cv-global-ind"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par commune</div><div class="chart-wrap"><canvas id="cv-global-pass"></canvas></div></div>
+  </div>
+  <div class="act-table-wrap">
+    <div class="act-table-head"><div class="chart-title" style="margin:0">Récapitulatif par accueil</div></div>
+    <table class="act-table"><thead><tr><th>Accueil</th><th>Individus total</th><th>Individus − 6 ans</th><th>Individus + 6 ans</th><th>Passages total</th><th>Passages − 6 ans</th><th>Passages + 6 ans</th></tr></thead><tbody id="act-tbody"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== – 6 ANS ===== -->
+<div id="panel-under6" class="panel">
+  <div class="section-title">Groupe − 6 ans</div>
+  <div class="section-sub">Maternelle · 3/5 ans · 5/6 ans — 85 enfants · 1 189 passages</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value" style="color:var(--u6)">85</div><div class="kpi-sub">enfants uniques</div></div>
+    <div class="kpi-card"><div class="kpi-label">Passages totaux</div><div class="kpi-value" style="color:var(--u6)">1 189</div></div>
+    <div class="kpi-card"><div class="kpi-label">Moy. passages</div><div class="kpi-value" style="color:var(--u6)">14.0</div><div class="kpi-sub">par enfant</div></div>
+    <div class="kpi-card"><div class="kpi-label">Mercredi</div><div class="kpi-value" style="color:var(--u6)">465</div><div class="kpi-sub">294 (24/25) + 171 (25/26)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Séjours</div><div class="kpi-value" style="color:var(--u6)">724</div><div class="kpi-sub">Été + Automne + Avril + Hivers</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Répartition Filles / Garçons</div><div class="chart-wrap"><canvas id="cg-u6"></canvas></div><div class="legend" style="margin-top:10px"><span class="legend-item"><span class="dot dot-f"></span>Filles : 44 (51.8%)</span><span class="legend-item"><span class="dot dot-h"></span>Garçons : 41 (48.2%)</span></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par accueil</div><div class="chart-wrap"><canvas id="ca-u6"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Années de naissance</div><div class="chart-wrap"><canvas id="cn-u6"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Quotient Familial (individus)</div><div class="chart-wrap"><canvas id="cq-u6"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Individus par commune</div><div class="chart-wrap"><canvas id="cv-u6-ind"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par commune</div><div class="chart-wrap"><canvas id="cv-u6-pass"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ===== + 6 ANS ===== -->
+<div id="panel-over6" class="panel">
+  <div class="section-title">Groupe + 6 ans</div>
+  <div class="section-sub">6/8 ans · 7/8 ans · 9/11 ans — 130 enfants · 1 864 passages</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value" style="color:var(--o6)">130</div></div>
+    <div class="kpi-card"><div class="kpi-label">Passages totaux</div><div class="kpi-value" style="color:var(--o6)">1 864</div></div>
+    <div class="kpi-card"><div class="kpi-label">Moy. passages</div><div class="kpi-value" style="color:var(--o6)">14.3</div><div class="kpi-sub">par enfant</div></div>
+    <div class="kpi-card"><div class="kpi-label">Mercredi</div><div class="kpi-value" style="color:var(--o6)">941</div><div class="kpi-sub">570 (24/25) + 371 (25/26)</div></div>
+    <div class="kpi-card"><div class="kpi-label">Séjours</div><div class="kpi-value" style="color:var(--o6)">923</div><div class="kpi-sub">Été + Automne + Avril + Hivers</div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Répartition Filles / Garçons</div><div class="chart-wrap"><canvas id="cg-o6"></canvas></div><div class="legend" style="margin-top:10px"><span class="legend-item"><span class="dot dot-f"></span>Filles : 60 (46.2%)</span><span class="legend-item"><span class="dot dot-h"></span>Garçons : 70 (53.8%)</span></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par accueil</div><div class="chart-wrap"><canvas id="ca-o6"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Années de naissance</div><div class="chart-wrap"><canvas id="cn-o6"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Quotient Familial (individus)</div><div class="chart-wrap"><canvas id="cq-o6"></canvas></div></div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card"><div class="chart-title">Individus par commune</div><div class="chart-wrap"><canvas id="cv-o6-ind"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">Passages par commune</div><div class="chart-wrap"><canvas id="cv-o6-pass"></canvas></div></div>
+  </div>
+</div>
+
+<!-- ===== DÉTAIL ACCUEIL ===== -->
+<div id="panel-detail" class="panel">
+  <div class="section-title">Détail par accueil</div>
+  <div class="section-sub">Analyse − 6 ans / + 6 ans pour chaque période</div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('prd','aut')">🍂 Automne 25/26</button>
+    <button class="tab-btn" onclick="showTab('prd','ete')">☀️ Été 24/25</button>
+    <button class="tab-btn" onclick="showTab('prd','avr')">🌸 Avril 24/25</button>
+    <button class="tab-btn" onclick="showTab('prd','hiv')">❄️ Hivers 24/25</button>
+    <button class="tab-btn" onclick="showTab('prd','m24')">📅 Mercredi 24/25</button>
+    <button class="tab-btn" onclick="showTab('prd','m25')">📅 Mercredi 25/26</button>
+  </div>
+  <div id="prd-aut" class="tab-panel active"><div class="detail-cols" id="dc-aut"></div></div>
+  <div id="prd-ete" class="tab-panel"><div class="detail-cols" id="dc-ete"></div></div>
+  <div id="prd-avr" class="tab-panel"><div class="detail-cols" id="dc-avr"></div></div>
+  <div id="prd-hiv" class="tab-panel"><div class="detail-cols" id="dc-hiv"></div></div>
+  <div id="prd-m24" class="tab-panel"><div class="detail-cols" id="dc-m24"></div></div>
+  <div id="prd-m25" class="tab-panel"><div class="detail-cols" id="dc-m25"></div></div>
+</div>
+
+<!-- ===== VILLES ===== -->
+<div id="panel-villes" class="panel">
+  <div class="section-title">Statistiques par commune</div>
+  <div class="section-sub">Analyse des 8 communes représentées</div>
+  <div class="tabs">
+    <button class="tab-btn ville-style active" onclick="showTab('vil','arb')">🏘️ L'Arbresle <span class="badge badge-all">174</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','sgn')">Saint-Germain-Nuelles <span class="badge" style="background:#FEF3C7;color:#D97706">9</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','bul')">Bully <span class="badge" style="background:#FCE7F3;color:#DB2777">5</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','len')">Lentilly <span class="badge" style="background:#F3F4F6;color:#6B7280">1</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','ali')">Alix <span class="badge" style="background:#F3F4F6;color:#6B7280">2</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','sjb')">St-Julien-sur-Bibost <span class="badge" style="background:#F3F4F6;color:#6B7280">1</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','fle')">Fleurieux-s-l'Arbresle <span class="badge" style="background:#F3F4F6;color:#6B7280">1</span></button>
+    <button class="tab-btn ville-style" onclick="showTab('vil','eve')">Éveux <span class="badge" style="background:#F3F4F6;color:#6B7280">1</span></button>
+  </div>
+
+  <div id="vil-arb" class="tab-panel active">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value" style="color:var(--accent)">174</div><div class="kpi-sub">89.7% des participants</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value" style="color:var(--accent)">2 956</div><div class="kpi-sub">96.8% des passages</div></div>
+      <div class="kpi-card"><div class="kpi-label">Genre</div><div class="kpi-value" style="color:var(--accent)">82F / 92G</div><div class="kpi-sub">47.1% filles</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueil le + fréquenté</div><div class="kpi-value" style="font-size:1.1rem;color:var(--accent)">Mercredi 24/25</div><div class="kpi-sub">853 passages · 68 enfants</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Quotient Familial</div><div class="chart-wrap"><canvas id="vq-arb"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Passages par accueil</div><div class="chart-wrap"><canvas id="vap-arb"></canvas></div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Années de naissance</div><div class="chart-wrap"><canvas id="vn-arb"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Individus par accueil</div><div class="chart-wrap"><canvas id="vai-arb"></canvas></div></div>
+    </div>
+  </div>
+
+  <div id="vil-sgn" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value" style="color:#D97706">9</div><div class="kpi-sub">4.6% des participants</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value" style="color:#D97706">43</div><div class="kpi-sub">1.4% des passages</div></div>
+      <div class="kpi-card"><div class="kpi-label">Genre</div><div class="kpi-value" style="color:#D97706">5F / 4G</div><div class="kpi-sub">55.6% filles</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueil le + fréquenté</div><div class="kpi-value" style="font-size:1.1rem;color:#D97706">Été 24/25</div><div class="kpi-sub">33 passages · 9 enfants</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Quotient Familial</div><div class="chart-wrap"><canvas id="vq-sgn"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Passages par accueil</div><div class="chart-wrap"><canvas id="vap-sgn"></canvas></div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Années de naissance</div><div class="chart-wrap"><canvas id="vn-sgn"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Individus par accueil</div><div class="chart-wrap"><canvas id="vai-sgn"></canvas></div></div>
+    </div>
+  </div>
+
+  <div id="vil-bul" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value" style="color:#DB2777">5</div><div class="kpi-sub">2.6% des participants</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value" style="color:#DB2777">16</div><div class="kpi-sub">0.5% des passages</div></div>
+      <div class="kpi-card"><div class="kpi-label">Genre</div><div class="kpi-value" style="color:#DB2777">2F / 3G</div><div class="kpi-sub">40% filles</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueil le + fréquenté</div><div class="kpi-value" style="font-size:1.1rem;color:#DB2777">Mercredi 25/26</div><div class="kpi-sub">11 passages · 3 enfants</div></div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">Quotient Familial</div><div class="chart-wrap"><canvas id="vq-bul"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">Passages par accueil</div><div class="chart-wrap"><canvas id="vap-bul"></canvas></div></div>
+    </div>
+  </div>
+
+  <div id="vil-len" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value">1</div><div class="kpi-sub">Fille · 2016</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value">20</div><div class="kpi-sub">Automne : 10 · Mercredi 25/26 : 10</div></div>
+      <div class="kpi-card"><div class="kpi-label">Quotient Familial</div><div class="kpi-value">&lt; 500</div><div class="kpi-sub">tranche inférieure</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueils fréquentés</div><div class="kpi-value">2</div><div class="kpi-sub">Automne + Mercredi 25/26</div></div>
+    </div>
+  </div>
+
+  <div id="vil-ali" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value">2</div><div class="kpi-sub">1 fille · 1 garçon</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value">0</div><div class="kpi-sub">inscrits sans passages réalisés</div></div>
+      <div class="kpi-card"><div class="kpi-label">Quotient Familial</div><div class="kpi-value">500-1000</div><div class="kpi-sub">2 individus dans cette tranche</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueil inscrit</div><div class="kpi-value">Été 24/25</div><div class="kpi-sub">inscrits uniquement</div></div>
+    </div>
+  </div>
+
+  <div id="vil-sjb" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value">1</div><div class="kpi-sub">Fille · 2019</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value">5</div><div class="kpi-sub">Été : 3 · Hivers : 2</div></div>
+      <div class="kpi-card"><div class="kpi-label">Quotient Familial</div><div class="kpi-value">1000-1500</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueils fréquentés</div><div class="kpi-value">2</div><div class="kpi-sub">Été + Hivers</div></div>
+    </div>
+  </div>
+
+  <div id="vil-fle" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value">1</div><div class="kpi-sub">Garçon · 2016</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value">2</div><div class="kpi-sub">Été 24/25 uniquement</div></div>
+      <div class="kpi-card"><div class="kpi-label">Quotient Familial</div><div class="kpi-value">&gt; 2000</div><div class="kpi-sub">tranche supérieure</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueils fréquentés</div><div class="kpi-value">1</div><div class="kpi-sub">Été uniquement</div></div>
+    </div>
+  </div>
+
+  <div id="vil-eve" class="tab-panel">
+    <div class="ville-kpis">
+      <div class="kpi-card"><div class="kpi-label">Individus</div><div class="kpi-value">1</div><div class="kpi-sub">Fille · 2018</div></div>
+      <div class="kpi-card"><div class="kpi-label">Passages</div><div class="kpi-value">11</div><div class="kpi-sub">Mercredi 24/25 uniquement</div></div>
+      <div class="kpi-card"><div class="kpi-label">Quotient Familial</div><div class="kpi-value">&gt; 2000</div><div class="kpi-sub">tranche supérieure</div></div>
+      <div class="kpi-card"><div class="kpi-label">Accueils fréquentés</div><div class="kpi-value">1</div><div class="kpi-sub">Mercredi 24/25</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const U6C='#2563EB',O6C='#059669',FC='#F43F5E',HC='#3B82F6',VC='#7C3AED';
+const QFL=['< 500','500-1000','1000-1500','1500-2000','> 2000'];
+const QFC=['#7C3AED','#2563EB','#059669','#F59E0B','#EF4444'];
+const ACTS=['Automne','Été','Avril','Hivers','Mercredi 24/25','Mercredi 25/26'];
+const ACTC=['#F59E0B','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899'];
+const VILLESC={'arbresle':'#2563EB','sgn':'#D97706','bul':'#DB2777','len':'#059669','ali':'#7C3AED','sjb':'#0891B2','fle':'#EA580C','eve':'#65A30D'};
+
+function showPanel(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.main-nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');event.currentTarget.classList.add('active');}
+function showTab(prefix,id){const els=document.querySelectorAll('[id^="'+prefix+'-"]');els.forEach(p=>p.classList.remove('active'));document.getElementById(prefix+'-'+id).classList.add('active');event.currentTarget.closest('.panel').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.currentTarget.classList.add('active');}
+
+Chart.defaults.font.family='DM Sans';Chart.defaults.font.size=11;Chart.defaults.plugins.legend.display=false;
+
+function mkDoughnut(id,labels,data,colors){if(!document.getElementById(id))return;new Chart(document.getElementById(id),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}}}}});}
+
+function mkBar(id,labels,data,colors,horiz=false,suffix=''){if(!document.getElementById(id))return;const isArr=Array.isArray(colors);new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[{data,backgroundColor:isArr?colors:(colors+'CC'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:horiz?'y':'x',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+(horiz?ctx.parsed.x:ctx.parsed.y)+(suffix?' '+suffix:'')}}},scales:{x:{grid:{display:horiz},ticks:{font:{size:10}}},y:{grid:{color:'#F1F5F9'},ticks:{font:{size:10}}}}}});}
+
+function mkGrouped(id,labels,d1,d2,l1,l2,c1,c2,suffix='passages'){if(!document.getElementById(id))return;new Chart(document.getElementById(id),{type:'bar',data:{labels,datasets:[{label:l1,data:d1,backgroundColor:c1+'CC',borderRadius:4,borderSkipped:false},{label:l2,data:d2,backgroundColor:c2+'CC',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,padding:10,font:{size:10}}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} ${suffix}`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'#F1F5F9'},ticks:{font:{size:10}}}}}});}
+
+function mkQF(id,data){mkBar(id,QFL,data,QFC,true,'individus');}
+
+// Build detail panels HTML
+const detailData={
+  aut:{lbl:'Automne 25/26',u6:{ind:25,pass:119,moy:4.8,genre:[13,12],qf:[3,7,5,7,3],annees:{2020:12,2021:8,2022:5},villes:{"L'Arbresle":24,'S-G-Nuelles':1}},o6:{ind:45,pass:192,moy:4.3,genre:[21,24],qf:[5,8,11,12,9],annees:{2015:5,2016:7,2017:7,2018:12,2019:14},villes:{"L'Arbresle":43,'Bully':1,'Lentilly':1}}},
+  ete:{lbl:'Été 24/25',u6:{ind:58,pass:405,moy:7.0,genre:[33,25],qf:[8,12,12,15,10],annees:{2018:2,2019:24,2020:18,2021:13,2023:1},villes:{"L'Arbresle":47,'S-G-Nuelles':7,'Bully':2,'Alix':1,'S-J-Bibost':1}},o6:{ind:71,pass:436,moy:6.1,genre:[31,40],qf:[10,16,19,13,13],annees:{2013:1,2014:4,2015:12,2016:14,2017:21,2018:19},villes:{"L'Arbresle":65,'Bully':2,'S-G-Nuelles':2,'Alix':1,'Fleurieux':1}}},
+  avr:{lbl:'Avril 24/25',u6:{ind:25,pass:85,moy:3.4,genre:[14,11],qf:[4,2,8,8,3],annees:{2019:10,2020:10,2021:5},villes:{"L'Arbresle":24,'S-G-Nuelles':1}},o6:{ind:37,pass:132,moy:3.6,genre:[17,20],qf:[8,9,8,9,3],annees:{2013:2,2014:1,2015:6,2016:4,2017:9,2018:13,2019:2},villes:{"L'Arbresle":37}}},
+  hiv:{lbl:'Hivers 24/25',u6:{ind:26,pass:115,moy:4.4,genre:[13,13],qf:[3,5,9,6,3],annees:{2019:10,2020:13,2021:3},villes:{"L'Arbresle":24,'S-G-Nuelles':1,'S-J-Bibost':1}},o6:{ind:38,pass:163,moy:4.3,genre:[17,21],qf:[8,7,11,7,5],annees:{2013:2,2014:3,2015:7,2016:5,2017:9,2018:11,2019:1},villes:{"L'Arbresle":38}}},
+  m24:{lbl:'Mercredi 24/25',u6:{ind:24,pass:294,moy:12.2,genre:[12,12],qf:[1,4,6,7,5],annees:{2019:11,2020:9,2021:4},villes:{"L'Arbresle":24}},o6:{ind:45,pass:570,moy:12.7,genre:[21,24],qf:[3,9,7,13,12],annees:{2013:2,2014:3,2015:9,2016:7,2017:9,2018:15},villes:{"L'Arbresle":44,'Éveux':1}}},
+  m25:{lbl:'Mercredi 25/26',u6:{ind:18,pass:171,moy:9.5,genre:[10,8],qf:[3,5,2,5,3],annees:{2020:8,2021:5,2022:5},villes:{"L'Arbresle":18}},o6:{ind:52,pass:371,moy:7.1,genre:[26,26],qf:[3,12,10,12,15],annees:{2015:6,2016:7,2017:9,2018:14,2019:16},villes:{"L'Arbresle":47,'Bully':3,'S-G-Nuelles':1,'Lentilly':1}}}
+};
+
+const VCOLORS=['#2563EB','#D97706','#DB2777','#7C3AED','#0891B2','#EA580C','#65A30D','#059669'];
+function buildDetailPanel(key){
+  const d=detailData[key];
+  ['u6','o6'].forEach(grp=>{
+    const g=d[grp];const isU=grp==='u6';const color=isU?U6C:O6C;const emoji=isU?'🧒':'👦';const cls=isU?'dgh-u6':'dgh-o6';
+    const uid=`dp-${key}-${grp}`;
+    const vLabels=Object.keys(g.villes);const vData=Object.values(g.villes);const vColors=vLabels.map((_,i)=>VCOLORS[i]||'#888');
+    const nLabels=Object.keys(g.annees).map(Number);const nData=Object.values(g.annees);
+    const card=`<div class="chart-card"><div class="dgh ${cls}">${emoji} ${isU?'− 6 ans':'+ 6 ans'} · ${d.lbl}</div>
+      <div class="mini-kpis">
+        <div class="mini-kpi"><div class="mini-kpi-label">Individus</div><div class="mini-kpi-val" style="color:${color}">${g.ind}</div></div>
+        <div class="mini-kpi"><div class="mini-kpi-label">Passages</div><div class="mini-kpi-val" style="color:${color}">${g.pass}</div></div>
+        <div class="mini-kpi"><div class="mini-kpi-label">Moy.</div><div class="mini-kpi-val" style="color:${color}">${g.moy}</div></div>
+      </div>
+      <div class="chart-title">Répartition genre</div><div class="chart-wrap-sm"><canvas id="${uid}-gen"></canvas></div>
+      <div class="divider"></div>
+      <div class="chart-title">Quotient Familial</div><div class="chart-wrap-sm"><canvas id="${uid}-qf"></canvas></div>
+      <div class="divider"></div>
+      <div class="chart-title">Années de naissance</div><div class="chart-wrap-sm"><canvas id="${uid}-ann"></canvas></div>
+      <div class="divider"></div>
+      <div class="chart-title">Communes</div><div class="chart-wrap-sm"><canvas id="${uid}-vil"></canvas></div>
+    </div>`;
+    document.getElementById(`dc-${key}`).innerHTML+=card;
+    // Charts rendered after DOM insert
+    setTimeout(()=>{
+      mkDoughnut(`${uid}-gen`,['Filles','Garçons'],g.genre,[FC,HC]);
+      mkQF(`${uid}-qf`,g.qf);
+      mkBar(`${uid}-ann`,nLabels,nData,color);
+      mkBar(`${uid}-vil`,vLabels,vData,vColors,true,'individus');
+    },0);
+  });
+}
+Object.keys(detailData).forEach(buildDetailPanel);
+
+// ===== GLOBAL CHARTS =====
+mkDoughnut('cg-global',['Filles','Garçons'],[93,101],[FC,HC]);
+mkGrouped('ca-global',ACTS,[119,405,85,115,294,171],[192,436,132,163,570,371],'− 6 ans','+ 6 ans',U6C,O6C);
+mkGrouped('cn-global',[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],[0,0,0,0,0,2,30,27,19,6,1],[3,5,21,21,26,30,24,0,0,0,0],'− 6 ans','+ 6 ans',U6C,O6C,'individus');
+mkQF('cq-global',[20,47,48,43,33]);
+mkBar('cv-global-ind',["L'Arbresle",'S-G-Nuelles','Bully','Alix','Lentilly','S-J-Bibost','Fleurieux','Éveux'],[174,9,5,2,1,1,1,1],['#2563EB','#D97706','#DB2777','#7C3AED','#059669','#0891B2','#EA580C','#65A30D'],true,'individus');
+mkBar('cv-global-pass',["L'Arbresle",'S-G-Nuelles','Bully','Lentilly','Éveux','S-J-Bibost','Fleurieux','Alix'],[2956,43,16,20,11,5,2,0],['#2563EB','#D97706','#DB2777','#059669','#65A30D','#0891B2','#EA580C','#7C3AED'],true,'passages');
+
+const actD={Automne:{u6i:25,o6i:45,u6p:119,o6p:192},Été:{u6i:58,o6i:71,u6p:405,o6p:436},Avril:{u6i:25,o6i:37,u6p:85,o6p:132},Hivers:{u6i:26,o6i:38,u6p:115,o6p:163},'Mercredi 24/25':{u6i:24,o6i:45,u6p:294,o6p:570},'Mercredi 25/26':{u6i:18,o6i:52,u6p:171,o6p:371}};
+const tbody=document.getElementById('act-tbody');
+ACTS.forEach((act,i)=>{const d=actD[act];tbody.innerHTML+=`<tr><td><span class="act-name"><span class="act-dot" style="background:${ACTC[i]}"></span>${act}</span></td><td><strong>${d.u6i+d.o6i}</strong></td><td><span style="color:${U6C};font-weight:600">${d.u6i}</span></td><td><span style="color:${O6C};font-weight:600">${d.o6i}</span></td><td><strong>${d.u6p+d.o6p}</strong></td><td><span style="color:${U6C};font-weight:600">${d.u6p}</span></td><td><span style="color:${O6C};font-weight:600">${d.o6p}</span></td></tr>`;});
+
+// ===== – 6 ANS =====
+mkDoughnut('cg-u6',['Filles','Garçons'],[44,41],[FC,HC]);
+mkBar('ca-u6',ACTS,[119,405,85,115,294,171],U6C);
+mkBar('cn-u6',[2018,2019,2020,2021,2022,2023],[2,30,27,19,6,1],U6C);
+mkQF('cq-u6',[8,18,21,23,13]);
+mkBar('cv-u6-ind',["L'Arbresle",'S-G-Nuelles','Bully','Alix','S-J-Bibost'],[74,7,2,1,1],['#2563EB','#D97706','#DB2777','#7C3AED','#0891B2'],true,'individus');
+mkBar('cv-u6-pass',["L'Arbresle",'S-G-Nuelles','Bully','S-J-Bibost'],[1160,22,2,5],['#2563EB','#D97706','#DB2777','#0891B2'],true,'passages');
+
+// ===== + 6 ANS =====
+mkDoughnut('cg-o6',['Filles','Garçons'],[60,70],[FC,HC]);
+mkBar('ca-o6',ACTS,[192,436,132,163,570,371],O6C);
+mkBar('cn-o6',[2013,2014,2015,2016,2017,2018,2019],[3,5,21,21,26,30,24],O6C);
+mkQF('cq-o6',[12,32,33,27,25]);
+mkBar('cv-o6-ind',["L'Arbresle",'Bully','S-G-Nuelles','Lentilly','Alix','Fleurieux','Éveux'],[120,3,3,1,1,1,1],['#2563EB','#DB2777','#D97706','#059669','#7C3AED','#EA580C','#65A30D'],true,'individus');
+mkBar('cv-o6-pass',["L'Arbresle",'S-G-Nuelles','Lentilly','Bully','Éveux','Fleurieux'],[1796,21,20,14,11,2],['#2563EB','#D97706','#059669','#DB2777','#65A30D','#EA580C'],true,'passages');
+
+// ===== VILLES =====
+mkQF('vq-arb',[19,44,44,41,24]);
+mkBar('vap-arb',ACTS,[295,803,214,271,853,520],ACTC);
+mkBar('vn-arb',[2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],[3,5,21,19,23,28,29,20,19,6,1],VC);
+mkBar('vai-arb',ACTS,[67,112,61,62,68,65],ACTC);
+
+mkQF('vq-sgn',[0,1,3,1,3]);
+mkBar('vap-sgn',ACTS,[1,33,3,5,0,1],['#D97706']);
+mkBar('vn-sgn',[2017,2018,2019,2020],[1,1,2,5],['#D97706']);
+mkBar('vai-sgn',ACTS,[1,9,1,1,0,1],['#D97706']);
+
+mkQF('vq-bul',[0,0,0,1,4]);
+mkBar('vap-bul',ACTS,[5,0,0,0,0,11],['#DB2777']);
+</script>
+</body>
+</html>
