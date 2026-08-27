@@ -1,98 +1,321 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MJC l'Arbresle</title>
-  <link rel="icon" type="image/png" href="files/logo.png" />
-  <style>
-    :root{--bg:#ffffff;--card:#e29a3b;--accent:#f97316;--text:#0f172a}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); margin:0; padding:24px;}
-    .container{max-width:900px; margin:0 auto}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
-    h1{margin:0;font-size:1.8rem;color: #f97316;}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MJC l'Arbresle</title>
+<link rel="icon" type="image/png" href="files/logo.png" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Miniver&family=Fredoka:wght@500;600;700&family=Archivo:ital,wght@0,400;0,600;0,700;1,600&display=swap');
 
-    .intro{margin:18px 0;padding:12px;background:linear-gradient(180deg,rgba(249,115,22,0.06),transparent);border-radius:10px}
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 4px 16px rgba(15,23,42,0.06)}
-    .buttons{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
-    .btn{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:12px;border-radius:10px;border:2px solid var(--accent);background:#fff;cursor:pointer;transition:background .2s;text-align:left}
-    .btn:hover{background:rgba(255, 117, 18, 0.822)}
-    .btn strong{display:block}
-    .small{font-size:.9rem;color:#334155}
-    footer{margin-top:20px;font-size:0.95rem;color:#0f172a}
-    code{background:#0f172a10;padding:4px 6px;border-radius:6px;font-family:monospace}
-    .explain{margin-top:12px;color:#334155}
-    @media (prefers-color-scheme:dark){:root{--bg:#ffffff;--card:#e29a3b;--accent:#fb923c;--text:#e6eef8} body{background:var(--bg);}}
-  </style>
+  :root{
+    --bg: #FBF9F5;
+    --ink: #1E2A3A;
+    --ink-soft: #5B6472;
+    --brand: #0066AF;
+    --card-bg: #FFFFFF;
+    --border: #E7E4DC;
+
+    --c-enfance: #DC6418;
+    --c-jeunesse: #0D7336;
+    --c-famille: #0066AF;
+    --c-activite: #E0559C;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Archivo', system-ui, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+  a:focus-visible, button:focus-visible{
+    outline:3px solid var(--brand);
+    outline-offset:2px;
+  }
+
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:44px 20px 60px;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:6px;
+  }
+
+  header img{
+    width:84px;
+    height:auto;
+    flex-shrink:0;
+  }
+
+  .eyebrow{
+    font-family:'Archivo', sans-serif;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    color:var(--brand);
+    font-weight:700;
+    margin:0 0 2px;
+  }
+
+  h1{
+    font-family:'Miniver', cursive;
+    font-weight:400;
+    font-size:clamp(2.4rem, 6vw, 3.4rem);
+    margin:0;
+    color:var(--brand);
+    line-height:1;
+  }
+
+  .intro{
+    margin:22px 0 40px;
+    color:var(--ink-soft);
+    font-size:1.02rem;
+    max-width:58ch;
+  }
+
+  h2.section-title{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    margin:0 0 16px;
+    color:var(--ink);
+  }
+
+  h2.section-title:not(:first-of-type){
+    margin-top:8px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:16px;
+    margin-bottom:40px;
+  }
+
+  .grid-1{
+    grid-template-columns:minmax(240px, 340px);
+    margin-bottom:44px;
+  }
+
+  .card{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px 18px 18px;
+    text-decoration:none;
+    color:var(--ink);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    overflow:hidden;
+  }
+
+  .card::before{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:6px;
+    background:var(--tab-color, var(--brand));
+  }
+
+  .card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 26px rgba(30,42,58,0.10);
+    border-color:var(--tab-color, var(--brand));
+  }
+
+  .card .icon{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:color-mix(in srgb, var(--tab-color, var(--brand)) 15%, white);
+    color:var(--tab-color, var(--brand));
+    margin-top:6px;
+  }
+
+  .card .icon svg{width:20px;height:20px;}
+
+  .card strong{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600;
+    font-size:1.08rem;
+  }
+
+  .card .tagline{
+    font-size:0.78rem;
+    font-style:italic;
+    color:var(--tab-color, var(--brand));
+    font-weight:600;
+    margin:0;
+  }
+
+  .card .desc{
+    font-size:0.88rem;
+    color:var(--ink-soft);
+    margin:2px 0 0;
+  }
+
+  .card .go{
+    margin-top:auto;
+    padding-top:10px;
+    font-size:0.82rem;
+    font-weight:700;
+    color:var(--tab-color, var(--brand));
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+
+  .card .go svg{
+    width:13px;height:13px;
+    transition:transform .15s ease;
+  }
+  .card:hover .go svg{transform:translateX(3px);}
+
+  .enfance{--tab-color:var(--c-enfance);}
+  .jeunesse{--tab-color:var(--c-jeunesse);}
+  .famille{--tab-color:var(--c-famille);}
+  .activite{--tab-color:var(--c-activite);}
+
+  footer{
+    border-top:1px solid var(--border);
+    padding-top:24px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:16px;
+    align-items:center;
+  }
+
+  footer .contact strong{display:block; font-family:'Fredoka', sans-serif; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:6px;}
+  footer .contact a{font-weight:700; text-decoration:none;}
+  footer .contact a:hover{color:var(--brand);}
+  footer .copy{font-size:0.8rem; color:var(--ink-soft);}
+
+  @media (max-width:480px){
+    .wrap{padding:30px 16px 40px;}
+    header{gap:12px;}
+    header img{width:62px;}
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <!-- Remplacez ce carré par votre logo en insérant une image -->
-      <div class="logo"></div>
-        <img src="files/logo.png" alt="Logo MJC l'Arbresle" style="max-width:100%;max-height:100%;border-radius:8px;">
-      </div>
-      <h1>MJC l'Arbresle</h1>
-    </header>
+<div class="wrap">
 
-    <div class="intro card">
-      <p>Page de secours contenant les liens et documents importants de la MJC l'Arbresle.</p>
+  <header>
+    <img src="files/logo.png" alt="Logo MJC l'Arbresle Centre Social" />
+    <div>
+      <p class="eyebrow">MJC Centre Social · L'Arbresle</p>
+      <h1>Bienvenue</h1>
     </div>
+  </header>
 
-    <section class="card" aria-labelledby="actions-title">
-      <h2 id="actions-title">Secteurs</h2>
+  <p class="intro">
+    Page de secours regroupant les liens et documents essentiels de la MJC.
+    Choisissez un secteur ci-dessous pour accéder aux informations et fichiers correspondants.
+  </p>
 
-      <div class="buttons">
-        <!-- Exemple de bouton vers un fichier PDF -->
-        <a class="btn" href="https://espacefamille.aiga.fr/index.html?dossier=11696244#connexion&113950" target="_blank">
-          <strong>Portail Famille</strong>
-          <span class="small">Lien</span>
-        </a>
+  <h2 class="section-title">Portail Famille</h2>
+  <div class="grid grid-1">
 
-        <a class="btn" href="files/inscriptions.pdf" target="_blank">
-          <strong>Dates d'inscriptions</strong>
-          <span class="small">Calendrier</span>
-        </a>
+    <a class="card famille" href="https://espacefamille.aiga.fr/index.html?dossier=11696244#connexion&113950" target="_blank" rel="noopener">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg></div>
+      <strong>Portail Famille</strong>
+      <p class="desc">Espace en ligne pour gérer votre dossier</p>
+      <span class="go">Ouvrir le portail <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
 
-        <a class="btn" href="files/infos-enfance.pdf" target="_blank">
-          <strong>Secteur enfance</strong>
-          <span class="small">Informations</span>
-        </a>
-
-        <a class="btn" href="files/infos-jeunesse.pdf" target="_blank">
-          <strong>Secteur Jeunesse</strong>
-          <span class="small">Informations</span>
-        </a>
-
-         <a class="btn" href="files/offre-emploi-animateur.pdf" target="_blank">
-          <strong>Recrutement Jeunesse</strong>
-          <span class="small">Lien</span>
-        </a>
-
-        <a class="btn" href="files/infos-famille.pdf" target="_blank">
-          <strong>Secteur Famille</strong>
-          <span class="small">Informations</span>
-        </a>
-
-        <a class="btn" href="files/infos-activites.pdf" target="_blank">
-          <strong>Secteur activité</strong>
-          <span class="small">Informations</span>
-        </a>
-
-        <!-- POUR AJOUTER UN NOUVEAU BOUTON :
-          1. Copier un des blocs <a class="btn" href="pdf/nom-du-fichier.pdf" target="_blank"> ... </a>
-          2. Changer le texte à l'intérieur <strong> ... </strong> et <span> ... </span>
-          3. Remplacer "nom-du-fichier.pdf" par le nom du fichier placé dans le dossier /pdf.
-        -->
-      </div>
-    </section>
-
-    <footer class="card" style="margin-top:14px">
-      <strong>Contact</strong>
-      <p>Téléphone : <a href="tel:+33474011591">04 74 01 15 91</a><br>
-      Mail : <a href="mailto:contact@mjc-larbresle.fr">contact@mjc-larbresle.fr</a></p>
-      <p class="small">© MJC l'Arbresle</p>
-    </footer>
   </div>
+
+  <h2 class="section-title">Les secteurs</h2>
+  <div class="grid">
+
+    <a class="card enfance" href="files/inscriptions.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+      <strong>Dates d'inscriptions</strong>
+      <p class="desc">Calendrier de la rentrée</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card enfance" href="files/infos-enfance.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="3"/><path d="M6 21c0-3.5 2.5-6 6-6s6 2.5 6 6"/></svg></div>
+      <strong>Secteur Enfance</strong>
+      <p class="tagline">Grandir, s'exprimer, s'engager</p>
+      <p class="desc">Informations pratiques</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card jeunesse" href="files/infos-jeunesse.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20l4-11 4 11M6.5 13.5h3M14 20V7l6 4-6 3"/></svg></div>
+      <strong>Secteur Jeunesse</strong>
+      <p class="tagline">Grandir, s'exprimer, s'engager</p>
+      <p class="desc">Informations pratiques</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card famille" href="files/infos-famille.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2.5"/><circle cx="16" cy="8" r="2.5"/><path d="M2 20c0-3 2.7-5 6-5s6 2 6 5M12 20c0-3 2.7-5 6-5s4 1.6 4 5"/></svg></div>
+      <strong>Secteur Famille</strong>
+      <p class="tagline">Créer du lien, agir ensemble</p>
+      <p class="desc">Informations pratiques</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <a class="card activite" href="files/infos-activites.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <strong>Activités régulières</strong>
+      <p class="tagline">Découvrir, pratiquer, partager</p>
+      <p class="desc">Informations pratiques</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+    <!-- POUR AJOUTER UN NOUVEAU SECTEUR :
+    1. Copier un bloc <a class="card ..." href="files/nom-du-fichier.pdf" target="_blank"> ... </a>
+    2. Choisir une couleur de secteur existante (enfance / jeunesse / famille / activite)
+       ou en ajouter une nouvelle dans :root en haut du fichier (voir la charte graphique).
+    3. Changer <strong>, <p class="tagline"> (optionnel), <p class="desc"> et le href.
+    -->
+
+  </div>
+
+  <h2 class="section-title">Le recrutement</h2>
+  <div class="grid grid-1">
+
+    <a class="card jeunesse" href="files/offre-emploi-animateur.pdf" target="_blank">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+      <strong>Recrutement Jeunesse</strong>
+      <p class="desc">Offre d'emploi animateur·trice</p>
+      <span class="go">Voir le PDF <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+
+  </div>
+
+  <footer>
+    <div class="contact">
+      <strong>Contact</strong>
+      <a href="tel:+33474011591">04 74 01 15 91</a> · <a href="mailto:contact@mjc-larbresle.fr">contact@mjc-larbresle.fr</a>
+    </div>
+    <p class="copy">© MJC Centre Social L'Arbresle</p>
+  </footer>
+
+</div>
 </body>
 </html>
